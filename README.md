@@ -1,46 +1,61 @@
-# Getting Started with Create React App
+# 手写recoil思路
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## 基本了解Recoil
+### 基本api 可以参考官网https://www.recoiljs.cn/
+* Atom
+> Atom 是状态的单位。它们可更新也可订阅：当 atom 被更新，每个被订阅的组件都将使用新值进行重渲染。它们也可以在运行时创建。可以使用 atom 替代组件内部的 state。如果多个组件使用相同的 atom，则这些组件共享 atom 的状态。
+```
+const fontSizeState = atom({
+  key: 'fontSizeState',
+  default: 14,
+})
+function FontButton() {
+  const [fontSize, setFontSize] = useRecoilState(fontSizeState);
+  return (
+    <button onClick={() => setFontSize((size) => size + 1)} style={{fontSize}}>
+      Click to Enlarge
+    </button>
+  );
+}
+```
+* Selector
+> selector 是一个纯函数，入参为 atom 或者其他 selector。当上游 atom 或 selector 更新时，将重新执行 selector 函数。组件可以像 atom 一样订阅 selector，当 selector 发生变化时，重新渲染相关组件。
 
-## Available Scripts
+> Selector 被用于计算基于 state 的派生数据。这使得我们避免了冗余 state，通常无需使用 reduce 来保持状态同步性和有效性。作为替代，将最小粒度的状态存储在 atom 中，而其它所有内容根据最小粒度的状态进行有效计算。由于 selector 会追踪需要哪些组件使用了相关的状态，因此它们使这种方式更加有效。
+从组件的角度来看，selector 和 atom 具有相同的功能，因此可以交替使用。
 
-In the project directory, you can run:
+```
+const fontSizeLabelState = selector({
+  key: 'fontSizeLabelState',
+  get: ({get}) => {
+    const fontSize = get(fontSizeState);
+    const unit = 'px';
 
-### `yarn start`
+    return `${fontSize}${unit}`;
+  },
+});
+```
+### 使用
+```
+// 基本api【useRecoilValue】使用
+const textState = atom({
+  key: 'textState',
+  default: '默认测试',
+});
+const App: FC = () => {
+  const count = useRecoilValue(textState);
+  return (
+    <div>
+      {count}
+    </div>
+  )
+}
+```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## 首先写观察者模式
+* 1. 添加订阅，订阅之后取消
+* 2. 获取值
+* 3. listener更新
+* 4. 派生类可以访问值
+```
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
-
-### `yarn test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `yarn build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `yarn eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
