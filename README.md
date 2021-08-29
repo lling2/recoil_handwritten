@@ -57,5 +57,10 @@ const App: FC = () => {
 * 2. 获取值
 * 3. listener更新
 * 4. 派生类可以访问值
-```
 
+## 实现useRecoilValue 简单的获取值
+```
+export function useRecoilValue<T>(value: Stateful<T>) {
+  return value.snapshot();
+}
+```

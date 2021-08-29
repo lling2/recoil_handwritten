@@ -1,9 +1,17 @@
-import React from 'react';
+import {FC} from 'react';
+import { atom, useRecoilValue } from './recoil';
 
-function App() {
+// atom
+const textState = atom({
+  key: 'textState',
+  default: 'recoil-handwritten',
+});
+
+const App:FC = () => {
+  const count = useRecoilValue(textState);
   return (
     <div className="App">
-      111
+      {count}
     </div>
   );
 }
