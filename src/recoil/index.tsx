@@ -1,3 +1,5 @@
+import { useCallback } from "react";
+
 interface Dissconnect {
   dissconnect: () => void
 }
@@ -63,10 +65,6 @@ export function useRecoilValue<T>(value: Stateful<T>) {
 // export function atom<V>(value: { key: string; default: V }) {
 //   return new Atom<V>(value.default);
 // }
-// const textState = atom({
-//   key: 'textState',
-//   default: '默认测试',
-// });
 export function atom<V>(value: {
   key: string;
   default: V
@@ -74,3 +72,21 @@ export function atom<V>(value: {
   return new Atom<V>(value.default)
 }
 
+// const [text, setText] = useRecoilState(textState);
+// useRecoilState
+export function useRecoilState<T>(atom: Atom<T>) {
+  const value = useRecoilValue(atom);
+
+  return tuplify(
+    value,
+    // 谁去改变，atom.setState({})，利用useCallback去包裹，防止组件多次渲染
+    // 比如：父组件有个子组件，只要父组件改变子组件就要改变，这样不好
+    useCallback(()=> {
+      (value: T) => atom.setState(value)
+    }, [atom])
+  )
+}
+
+function tuplify<T extends unknown[]>(...elements: T) {
+  return elements;
+}

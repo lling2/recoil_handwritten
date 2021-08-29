@@ -64,3 +64,6 @@ export function useRecoilValue<T>(value: Stateful<T>) {
   return value.snapshot();
 }
 ```
+
+## 实现一个atom方法，他的参数格式是
+> {key: '', default: any}
