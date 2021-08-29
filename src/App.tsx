@@ -1,5 +1,5 @@
 import {FC} from 'react';
-import { atom, useRecoilValue } from './recoil';
+import { atom, useRecoilValue, useRecoilState } from './recoil';
 
 // atom
 const textState = atom({
@@ -9,9 +9,12 @@ const textState = atom({
 
 const App:FC = () => {
   const count = useRecoilValue(textState);
+  const [text] = useRecoilState(textState);
   return (
     <div className="App">
-      {count}
+      {`【useRecoilValue】获取值：${count}`}
+      <br/>
+      {`【useRecoilState】获取值：${text}`}
     </div>
   );
 }
