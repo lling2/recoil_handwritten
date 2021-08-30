@@ -1,3 +1,11 @@
+<!--
+ * @Author: your name
+ * @Date: 2021-08-30 16:25:20
+ * @LastEditTime: 2021-08-30 16:27:32
+ * @LastEditors: your name
+ * @Description: In User Settings Edit
+ * @FilePath: /recoil_handwritten/README.md
+-->
 # 手写recoil思路
 
 ## 基本了解Recoil
@@ -67,3 +75,7 @@ export function useRecoilValue<T>(value: Stateful<T>) {
 
 ## 实现一个atom方法，他的参数格式是
 > {key: '', default: any}
+
+```
+
+```
