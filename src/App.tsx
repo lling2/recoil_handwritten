@@ -1,40 +1,36 @@
-import { FC } from 'react';
-import {
-  atom, 
-  useRecoilValue,
-  useRecoilState,
-  selector
-} from './recoil';
+import React, { FC, ChangeEvent } from 'react';
+import { atom, selector, useRecoilValue, useRecoilState } from './recoil';
 
-// atom
 const textState = atom({
   key: 'textState',
-  default: 'recoil-handwritten',
+  default: '默认测试',
 });
-
-// selector
 const charCountState = selector({
   key: 'charCountState',
   get: ({ get }) => {
     const text = get(textState);
-    return text.length;
+    return text.length+1111;
   },
 });
-
 const App: FC = () => {
-  const count = useRecoilValue(textState);
-  const [text] = useRecoilState(textState);
-  const count_selector = useRecoilValue(charCountState);
+  // const value = useRecoilValue(textState);
+  const [text, setText] = useRecoilState(textState);
+  const count = useRecoilValue(charCountState);
+
+  const onChange = (event: ChangeEvent<HTMLInputElement>) => {
+    //value 只有input元素
+    setText(event.target.value);
+  };
+
   return (
     <div className="App">
-      {`【useRecoilValue】获取值：${count}`}
-      <br/>
-      {`【useRecoilState】获取值：${text}`}
-
-      <br/>
-      {`[selector]${count_selector}`}
+      <input type="text" value={text} onChange={onChange} />
+      <br />
+      Echo: {text}
+      <hr />
+      <h2>{count}</h2>
     </div>
   );
-}
+};
 
 export default App;

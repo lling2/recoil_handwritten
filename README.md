@@ -1,8 +1,8 @@
 <!--
  * @Author: your name
  * @Date: 2021-08-30 16:25:20
- * @LastEditTime: 2021-08-30 16:27:32
- * @LastEditors: your name
+ * @LastEditTime: 2021-09-06 00:08:40
+ * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: /recoil_handwritten/README.md
 -->
@@ -75,7 +75,23 @@ export function useRecoilValue<T>(value: Stateful<T>) {
 
 ## 实现一个atom方法，他的参数格式是
 > {key: '', default: any}
-
 ```
+class Atom<T> extends Stateful<T> {
+  public setState(value: T) {
+    super.update(value);
+  }
+}
 
+export function atom<V>(value: {
+  key: string;
+  default: V
+}) {
+  // console.log(new Atom<V>(value.default), 11111)
+  // Atom {value: "recoil-handwritten", listeners: Set(0)} 11111
+  return new Atom<V>(value.default)
+}
+
+class Atom<T> extends Stateful<T> {
+  setState
+}
 ```
