@@ -38,16 +38,16 @@ class Stateful<T> {
   };
 
   // listener的更新
-public emit() {
-  console.log('[ 状态更新 ]', Math.random());
-  for (const listener of Array.from(this.listeners)) {
-    // this.listeners 表示如下
-    // 0: () => this.updateSelcrtor()
-    // 1: () => updateState({})
-    console.log(listener, 'listener..../////', this.listeners, 'this.listeners') // () => updateState({})
-    listener(this.snapshot());
+  public emit() {
+    console.log('[ 状态更新 ]', Math.random());
+    for (const listener of Array.from(this.listeners)) {
+      // this.listeners 表示如下
+      // 0: () => this.updateSelcrtor()
+      // 1: () => updateState({})
+      console.log(listener, 'listener..../////', this.listeners, 'this.listeners') // () => updateState({})
+      listener(this.snapshot());
+    }
   }
-}
 
   // 派生类可以访问，更新值
   protected update(value: T) {
@@ -55,26 +55,6 @@ public emit() {
       this.value = value;
       this.emit();
     }
-  }
-}
-
-// Selector
-class Selector<T> extends Stateful<T> {
-  constructor(private readonly generate: SelectorGenerator<T>) {
-    super(undefined as any);
-    this.value = generate({ get: (dep: Atom<any>) => this.addSub(dep) });
-  }
-  //维护的是Atom变化
-  private registeredDeps = new Set<Atom<any>>();
-  private addSub(dep: Atom<any>) {
-    if (!this.registeredDeps.has(dep)) {
-      dep.subscribe(() => this.updateSelcrtor());
-      this.registeredDeps.add(dep);
-    }
-    return dep.snapshot();
-  }
-  private updateSelcrtor() {
-    this.update(this.generate({ get: (dep: Atom<any>) => this.addSub(dep) }));
   }
 }
 
@@ -94,16 +74,36 @@ export function atom<V>(value: { key: string; default: V }) {
   return new Atom<V>(value.default);
 }
 
-// selector内部get属性里面还有一个get方法
-// ({ get }) => {
-//     //内部结构出来一个get 获取原子state 跟着变
-//     const text = get(textState);
-//     return text.length;
-//   }
+// Selector
+// ({ get }) => { const text = get(textState); return text.length+1111 }
+class Selector<T> extends Stateful<T> {
+  // private readonly
+  constructor(private readonly generate: SelectorGenerator<T>) {
+    super(undefined as any);
+    this.value = generate({ get: (dep: Atom<any>) => this.addSub(dep) });
+  }
+
+  //维护的是Atom变化
+  // ？？？？？new Set<Atom<any>>()
+  private registeredDeps = new Set<Atom<any>>();
+  private addSub(dep: Atom<any>) {
+    if (!this.registeredDeps.has(dep)) {
+      dep.subscribe(() => this.updateSelcrtor());
+      this.registeredDeps.add(dep);
+    }
+    return dep.snapshot();
+  }
+  private updateSelcrtor() {
+    this.update(this.generate({ get: (dep: Atom<any>) => this.addSub(dep) }));
+  }
+}
+
+// ** selector内部get属性里面还有一个get方法
 // ref:{s:a}:{s:number} = {s:1}
 // const a = ref({s}) : Ref<{s:number}= {s:1}
 type SelectorGenerator<V> = (context: { get: <T>(dep: Atom<T>) => T }) => V;
-// 参数context是一个对象，对象里面包含get属性
+//  get: ({ get }) => { const text = get(textState); return text.length+1111 }});
+// 参数context是一个对象，对象里面包含get属性  
 // A = (context: {get: }) => v; 
 // const charCountState = selector({
 //   key: 'charCountState',
@@ -114,17 +114,20 @@ type SelectorGenerator<V> = (context: { get: <T>(dep: Atom<T>) => T }) => V;
 // });
 export function selector<V>(value: {
   key: string;
-  //selector内部get取值
+  // selector内部get取值
   get: SelectorGenerator<V>;
 }) {
+  // ({ get }) => { const text = get(textState); return text.length+1111 }
   return new Selector(value.get);
 }
 
+// 重点**
 export function useRecoilValue<T>(value: Stateful<T>) {
   // react组件更新
   // 订阅一些事件 让组件跟着更新
   // 防止有些value改了，但是useRecoilValue返回最新的
   const [, updateState] = useState({});
+  // ？？？？？ 
   useEffect(() => {
     const { disconnect } = value.subscribe(() => updateState({}));
     // 副作用原因！！
@@ -134,6 +137,10 @@ export function useRecoilValue<T>(value: Stateful<T>) {
 }
 
 // const [text, setText] = useRecoilState(textState);
+// const textState = atom({
+//   key: 'textState',
+//   default: '默认测试',
+// });
 export function useRecoilState<T>(atom: Atom<T>) {
   const value = useRecoilValue(atom);
   // 解构数组
