@@ -124,9 +124,11 @@ export function selector<V>(value: {
 // 重点**
 export function useRecoilValue<T>(value: Stateful<T>) {
   // react组件更新
-  // 订阅一些事件 让组件跟着更新
+  // 订阅一些事件 让组件跟着更新?????? 把单向数据流-》双向数据流
+
+
   // 防止有些value改了，但是useRecoilValue返回最新的
-  const [, updateState] = useState({});
+  const [, updateState] = useState({}); // {} !== {}
   // ？？？？？ 
   useEffect(() => {
     const { disconnect } = value.subscribe(() => updateState({}));
@@ -142,7 +144,9 @@ export function useRecoilValue<T>(value: Stateful<T>) {
 //   default: '默认测试',
 // });
 export function useRecoilState<T>(atom: Atom<T>) {
+  // 获取值
   const value = useRecoilValue(atom);
+
   // 解构数组
   console.log(tuplify(
     value,
@@ -152,6 +156,7 @@ export function useRecoilState<T>(atom: Atom<T>) {
   //1: value => atom.setState(value)
   return tuplify(
     value,
+    // useCallback((value: T) => atom.setState(value), [atom])
     useCallback((value: T) => atom.setState(value), [atom])
   );
 }
